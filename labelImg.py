@@ -29,17 +29,18 @@ import resources
 dir_name = os.path.abspath(os.path.dirname(__file__))
 libs_path = os.path.join(dir_name, 'libs')
 sys.path.insert(0, libs_path)
-from lib import struct, newAction, newIcon, addActions, fmtShortcut
-from shape import Shape, DEFAULT_LINE_COLOR, DEFAULT_FILL_COLOR
-from canvas import Canvas
-from zoomWidget import ZoomWidget
-from labelDialog import LabelDialog
-from colorDialog import ColorDialog
-from labelFile import LabelFile, LabelFileError
-from toolBar import ToolBar
-from pascal_voc_io import PascalVocReader
-from pascal_voc_io import XML_EXT
-from ustr import ustr
+
+from libs.lib import struct, newAction, newIcon, addActions, fmtShortcut
+from libs.shape import Shape, DEFAULT_LINE_COLOR, DEFAULT_FILL_COLOR
+from libs.canvas import Canvas
+from libs.zoomWidget import ZoomWidget
+from libs.labelDialog import LabelDialog
+from libs.colorDialog import ColorDialog
+from libs.labelFile import LabelFile, LabelFileError
+from libs.toolBar import ToolBar
+from libs.pascal_voc_io import PascalVocReader
+from libs.pascal_voc_io import XML_EXT
+from libs.ustr import ustr
 
 __appname__ = 'labelImg'
 
@@ -895,7 +896,7 @@ class MainWindow(QMainWindow, WindowMixin):
             # Default : select last item if there is at least one item
             if self.labelList.count():
                 self.labelList.setCurrentItem(self.labelList.item(self.labelList.count()-1))
-                self.labelList.setItemSelected(self.labelList.item(self.labelList.count()-1), True)
+                #self.labelList.setItemSelected(self.labelList.item(self.labelList.count()-1), True)
 
             self.canvas.setFocus(True)
             return True

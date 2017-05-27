@@ -7,7 +7,7 @@ except ImportError:
     from PyQt4.QtGui import QImage
 
 from base64 import b64encode, b64decode
-from pascal_voc_io import PascalVocWriter
+from libs.pascal_voc_io import PascalVocWriter
 import os.path
 import sys
 
