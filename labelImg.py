@@ -466,6 +466,10 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.populateModeActions()
 
+        # max windows when app startup
+        self.showMaximized()
+
+
     ## Support Functions ##
 
     def noShapes(self):
