@@ -25,9 +25,9 @@ class PascalVocWriter:
         """
             Return a pretty-printed XML string for the Element.
         """
-        rough_string = ElementTree.tostring(elem, 'utf8')
+        rough_string = ElementTree.tostring(elem, encoding='utf-8')
         root = etree.fromstring(rough_string)
-        return etree.tostring(root, pretty_print=True)
+        return etree.tostring(root, pretty_print=True, encoding='utf-8')
 
     def genXML(self):
         """
@@ -117,7 +117,7 @@ class PascalVocWriter:
             out_file = codecs.open(targetFile, 'w', encoding='utf-8')
 
         prettifyResult = self.prettify(root)
-        out_file.write(prettifyResult.decode('utf8'))
+        out_file.write(prettifyResult.decode('utf-8'))
         out_file.close()
 
 

@@ -91,6 +91,7 @@ class MainWindow(QMainWindow, WindowMixin):
     def __init__(self, defaultFilename=None, defaultPrefdefClassFile=None):
         super(MainWindow, self).__init__()
         self.setWindowTitle(__appname__)
+
         # Save as Pascal voc xml
         self.defaultSaveDir = None
         self.usingPascalVocFormat = True
@@ -126,6 +127,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.defaultLabelTextLine = QLineEdit()
         useDefautLabelQHBoxLayout = QHBoxLayout()       
         useDefautLabelQHBoxLayout.addWidget(self.useDefautLabelCheckbox)
+        self.useDefautLabelCheckbox.setChecked(True)
         useDefautLabelQHBoxLayout.addWidget(self.defaultLabelTextLine)
         useDefautLabelContainer = QWidget()
         useDefautLabelContainer.setLayout(useDefautLabelQHBoxLayout)
@@ -157,11 +159,15 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dock.setObjectName(u'Labels')
         self.dock.setWidget(labelListContainer)
 
+        # class filter drop box
+        self.classComboBox = QComboBox()
+
         # Tzutalin 20160906 : Add file list and dock to move faster
         self.fileListWidget = QListWidget()
         self.fileListWidget.itemDoubleClicked.connect(self.fileitemDoubleClicked)
         filelistLayout = QVBoxLayout()
         filelistLayout.setContentsMargins(0, 0, 0, 0)
+        filelistLayout.addWidget(self.classComboBox)
         filelistLayout.addWidget(self.fileListWidget)
         fileListContainer = QWidget()
         fileListContainer.setLayout(filelistLayout)
@@ -619,6 +625,21 @@ class MainWindow(QMainWindow, WindowMixin):
             item.setText(text)
             self.setDirty()
 
+    def classIndexChanged(self, newText):
+        # clear all items
+        self.fileListWidget.clear()
+        self.mImgList.clear()
+        sel_class_name = newText
+        for imgPath in self.mImgListAll:
+            paths = imgPath.replace("\\", "/").split('/')
+            class_name = paths[-2]
+            if class_name == sel_class_name or newText == 'Show all images':
+                self.mImgList.append(imgPath)
+                item = QListWidgetItem(imgPath)
+                self.fileListWidget.addItem(item)
+
+
+
     # Tzutalin 20160906 : Add file list and dock to move faster
     def fileitemDoubleClicked(self, item=None):
         currIndex = self.mImgList.index(ustr(item.text()))
@@ -626,6 +647,9 @@ class MainWindow(QMainWindow, WindowMixin):
             filename = self.mImgList[currIndex]
             if filename:
                 self.loadFile(filename)
+                paths = filename.replace("\\", "/").split('/')
+                class_name = paths[-2]
+                self.defaultLabelTextLine.setText(class_name)
 
     # Add chris
     def btnstate(self, item= None):
@@ -975,15 +999,17 @@ class MainWindow(QMainWindow, WindowMixin):
     def scanAllImages(self, folderPath):
         extensions = ['.jpeg', '.jpg', '.png', '.bmp']
         images = []
-
+        dirList = []
         for root, dirs, files in os.walk(folderPath):
+            if dirs:
+                dirList = dirs
             for file in files:
                 if file.lower().endswith(tuple(extensions)):
                     relatviePath = os.path.join(root, file)
                     path = ustr(os.path.abspath(relatviePath))
                     images.append(path)
         images.sort(key=lambda x: x.lower())
-        return images
+        return images, ['Show all images'] + dirList
 
     def changeSavedir(self, _value=False):
         if self.defaultSaveDir is not None:
@@ -1037,11 +1063,20 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dirname = dirpath
         self.filePath = None
         self.fileListWidget.clear()
-        self.mImgList = self.scanAllImages(dirpath)
+        self.mImgListAll, self.mDirList = self.scanAllImages(dirpath)
+        self.mImgList = self.mImgListAll.copy()
         self.openNextImg()
+        for classDir in self.mDirList:
+            self.classComboBox.addItem(classDir)
         for imgPath in self.mImgList:
             item = QListWidgetItem(imgPath)
             self.fileListWidget.addItem(item)
+        try:
+            self.classComboBox.currentIndexChanged[str].disconnect(self.classIndexChanged)
+        except TypeError:
+            print('not connect')
+        self.classComboBox.currentIndexChanged[str].connect(self.classIndexChanged)
+
 
     def verifyImg(self, _value=False):
         # Proceding next image without dialog if having any label
@@ -1096,6 +1131,9 @@ class MainWindow(QMainWindow, WindowMixin):
 
         if filename:
             self.loadFile(filename)
+            paths = filename.replace("\\", "/").split('/')
+            class_name = paths[-2]
+            self.defaultLabelTextLine.setText(class_name)
 
     def openFile(self, _value=False):
         if not self.mayContinue():
