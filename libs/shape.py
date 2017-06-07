@@ -42,6 +42,8 @@ class Shape(object):
         self.fill = False
         self.selected = False
         self.difficult = difficult
+        self.label_user = None
+        self.label_time = None
 
         self._highlightIndex = None
         self._highlightMode = self.NEAR_VERTEX

@@ -11,7 +11,7 @@ except ImportError:
 
 from libs.shape import Shape
 from libs.lib import distance
-
+import datetime
 CURSOR_DEFAULT = Qt.ArrowCursor
 CURSOR_POINT = Qt.PointingHandCursor
 CURSOR_DRAW = Qt.CrossCursor
@@ -60,6 +60,7 @@ class Canvas(QWidget):
         self.setMouseTracking(True)
         self.setFocusPolicy(Qt.WheelFocus)
         self.verified = False
+        self.current_user = 'LABEL_USER'
 
     def enterEvent(self, ev):
         self.overrideCursor(self._cursor)
@@ -449,6 +450,8 @@ class Canvas(QWidget):
 
     def finalise(self):
         assert self.current
+        self.current.label_user = self.current_user
+        self.current.label_time = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
         self.current.close()
         self.shapes.append(self.current)
         self.current = None

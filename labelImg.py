@@ -5,6 +5,7 @@ import os.path
 import re
 import sys
 import subprocess
+import datetime
 
 from functools import partial
 from collections import defaultdict
@@ -91,6 +92,9 @@ class MainWindow(QMainWindow, WindowMixin):
     def __init__(self, defaultFilename=None, defaultPrefdefClassFile=None):
         super(MainWindow, self).__init__()
         self.setWindowTitle(__appname__)
+
+        # load username
+        self.username = 'anyone'
 
         # Save as Pascal voc xml
         self.defaultSaveDir = None
@@ -739,6 +743,8 @@ class MainWindow(QMainWindow, WindowMixin):
 
         def format_shape(s):
             return dict(label=s.label,
+                        label_user=s.label_user,
+                        label_time=s.label_time,
                         line_color=s.line_color.getRgb()
                         if s.line_color != self.lineColor else None,
                         fill_color=s.fill_color.getRgb()
@@ -754,6 +760,13 @@ class MainWindow(QMainWindow, WindowMixin):
                 print ('Img: ' + self.filePath + ' -> Its xml: ' + annotationFilePath)
                 self.labelFile.savePascalVocFormat(annotationFilePath, shapes, self.filePath, self.imageData,
                                                    self.lineColor.getRgb(), self.fillColor.getRgb())
+                # test save json
+                annFolderPath = os.path.dirname(annotationFilePath)
+                annFileName = os.path.basename(annotationFilePath)
+                annFileNameWithoutExt = os.path.splitext(annFileName)[0]
+                annFileName = annFileNameWithoutExt + '.json'
+                jsonFilePath = os.path.join(annFolderPath, annFileName)
+                self.labelFile.saveJsonFormat(jsonFilePath, shapes, self.filePath)
             else:
                 self.labelFile.save(annotationFilePath, shapes, self.filePath, self.imageData,
                                     self.lineColor.getRgb(), self.fillColor.getRgb())
@@ -1082,12 +1095,12 @@ class MainWindow(QMainWindow, WindowMixin):
         # Proceding next image without dialog if having any label
          if self.filePath is not None:
             try:
-                self.labelFile.toggleVerify()
+                self.labelFile.toggleVerify(self.username, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
             except AttributeError:
                 # If the labelling file does not exist yet, create if and
                 # re-save it with the verified attribute.
                 self.saveFile()
-                self.labelFile.toggleVerify()
+                self.labelFile.toggleVerify(self.username, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
 
             self.canvas.verified = self.labelFile.verified
             self.paintCanvas()
